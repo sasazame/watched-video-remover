@@ -1,0 +1,36 @@
+# Node modules
+node_modules/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+npm-debug.log*
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Build output
+dist/
+build/
+
+# Chrome extension package
+*.crx
+*.pem
+
+# Temporary files
+*.tmp
+*.temp
+
+# Local development files
+.env
+.env.local

@@ -1,0 +1,20 @@
+{
+  "name": "youtube-watched-video-remover",
+  "version": "1.0.0",
+  "description": "Chrome extension to remove watched videos from YouTube",
+  "scripts": {
+    "test": "open test/test.html",
+    "test:cli": "mocha test/test.js --require test/test-mocks.js"
+  },
+  "keywords": [
+    "youtube",
+    "chrome-extension",
+    "watched-videos"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "chai": "^4.3.10"
+  }
+}
