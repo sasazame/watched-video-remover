@@ -30,8 +30,10 @@ async function loadSettings() {
   
   if (result.extensionEnabled !== undefined) {
     extensionEnabled = result.extensionEnabled;
-    updatePowerButton();
+  } else {
+    extensionEnabled = true; // Default to enabled
   }
+  updatePowerButton();
   
   if (result.watchedVideos) {
     watchedCountSpan.textContent = result.watchedVideos.length;
@@ -73,6 +75,10 @@ powerButton.addEventListener('click', async () => {
     chrome.tabs.sendMessage(tab.id, { 
       action: 'toggleExtension', 
       enabled: extensionEnabled 
+    }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.log('Tab communication error:', chrome.runtime.lastError);
+      }
     });
   });
   
@@ -108,7 +114,11 @@ saveButton.addEventListener('click', async () => {
   // Apply settings without reload
   const tabs = await chrome.tabs.query({ url: ['*://www.youtube.com/*', '*://youtube.com/*'] });
   tabs.forEach(tab => {
-    chrome.tabs.sendMessage(tab.id, { action: 'applySettings' });
+    chrome.tabs.sendMessage(tab.id, { action: 'applySettings' }, (response) => {
+      if (chrome.runtime.lastError) {
+        console.log('Tab communication error:', chrome.runtime.lastError);
+      }
+    });
   });
   
   showStatus('Settings applied!');
@@ -139,11 +149,25 @@ openOptionsButton.addEventListener('click', () => {
 async function loadSkippedVideos() {
   const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
   if (tabs[0]?.url?.includes('youtube.com')) {
-    chrome.tabs.sendMessage(tabs[0].id, { action: 'getSkippedVideos' }, (response) => {
-      if (response && response.skippedVideos) {
-        displaySkippedVideos(response.skippedVideos);
-      }
-    });
+    try {
+      chrome.tabs.sendMessage(tabs[0].id, { action: 'getSkippedVideos' }, (response) => {
+        if (chrome.runtime.lastError) {
+          console.error('Error loading skipped videos:', chrome.runtime.lastError);
+          skippedList.innerHTML = '<div style="color: #666; text-align: center;">No skipped videos yet</div>';
+          return;
+        }
+        if (response && response.skippedVideos) {
+          displaySkippedVideos(response.skippedVideos);
+        } else {
+          skippedList.innerHTML = '<div style="color: #666; text-align: center;">No skipped videos yet</div>';
+        }
+      });
+    } catch (error) {
+      console.error('Error:', error);
+      skippedList.innerHTML = '<div style="color: #666; text-align: center;">No skipped videos yet</div>';
+    }
+  } else {
+    skippedList.innerHTML = '<div style="color: #666; text-align: center;">Open YouTube to see skipped videos</div>';
   }
 }
 

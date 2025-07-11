@@ -35,6 +35,8 @@ async function loadSettings() {
   
   if (result.extensionEnabled !== undefined) {
     extensionEnabled = result.extensionEnabled;
+  } else {
+    extensionEnabled = true; // Default to enabled
   }
   
   if (result.watchedVideos) {
@@ -151,6 +153,9 @@ function hideVideo(videoElement) {
 
 // Process video thumbnails
 function processVideoThumbnails() {
+  // Skip if extension is disabled
+  if (!extensionEnabled) return;
+  
   // Regular videos with old structure
   if (settings.hideRegularVideos) {
     const thumbnails = document.querySelectorAll('ytd-thumbnail');
@@ -260,7 +265,7 @@ function checkAndSkipCurrentVideo() {
   
   if (videoId && watchedVideos.has(videoId)) {
     // Track skipped video
-    const videoTitle = document.querySelector('h1.ytd-video-primary-info-renderer')?.textContent || 'Unknown';
+    const videoTitle = document.querySelector('h1.ytd-watch-metadata, h1.ytd-video-primary-info-renderer, .title.ytd-video-primary-info-renderer')?.textContent?.trim() || 'Unknown';
     skippedVideos.push({
       id: videoId,
       title: videoTitle,
@@ -323,7 +328,9 @@ function checkVideoPlayerProgress() {
 
 // Observer for dynamic content
 const observer = new MutationObserver((mutations) => {
-  processVideoThumbnails();
+  if (extensionEnabled) {
+    processVideoThumbnails();
+  }
 });
 
 // URL change observer
@@ -342,8 +349,10 @@ const urlObserver = new MutationObserver(() => {
 async function init() {
   await loadSettings();
   
-  // Initial processing
-  processVideoThumbnails();
+  // Initial processing only if enabled
+  if (extensionEnabled) {
+    processVideoThumbnails();
+  }
   
   // Check current video
   if (window.location.href.includes('/watch')) {
@@ -421,6 +430,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     }
   } else if (request.action === 'getSkippedVideos') {
     sendResponse({ skippedVideos: skippedVideos });
+    return true; // Important for async response
   }
 });
 
