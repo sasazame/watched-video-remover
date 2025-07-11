@@ -7,7 +7,8 @@ chrome.runtime.onInstalled.addListener((details) => {
       autoSkipEnabled: true,
       watchedVideos: [],
       hideMode: 'hide', // 'hide' or 'fade'
-      showStats: true
+      showStats: true,
+      extensionEnabled: true
     });
   }
 });

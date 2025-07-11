@@ -1,8 +1,11 @@
 let watchedVideos = new Set();
 let pendingWatchedVideos = new Set(); // Buffer for batch saving
 let hiddenVideoCount = 0; // Track hidden videos in current session
+let skippedVideos = []; // Track skipped videos in current session
 let saveTimeout = null; // Timeout for batch saving
 const SAVE_DELAY = 5000; // Save every 5 seconds
+let extensionEnabled = true; // Master ON/OFF switch
+let pendingThreshold = null; // Pending threshold change
 let settings = {
   threshold: 90,
   autoSkipEnabled: true,
@@ -20,7 +23,7 @@ async function loadSettings() {
   const result = await chrome.storage.sync.get([
     'threshold', 'watchedVideos', 'autoSkipEnabled', 'hideMode',
     'skipDelayEnabled', 'skipDelay', 'hideRegularVideos', 
-    'hideShorts', 'hideLiveStreams', 'maxStoredVideos'
+    'hideShorts', 'hideLiveStreams', 'maxStoredVideos', 'extensionEnabled'
   ]);
   
   // Update settings
@@ -29,6 +32,10 @@ async function loadSettings() {
       settings[key] = result[key];
     }
   });
+  
+  if (result.extensionEnabled !== undefined) {
+    extensionEnabled = result.extensionEnabled;
+  }
   
   if (result.watchedVideos) {
     watchedVideos = new Set(result.watchedVideos);
@@ -123,6 +130,9 @@ function updateBadge() {
 
 // Hide video element
 function hideVideo(videoElement) {
+  // Skip if extension is disabled
+  if (!extensionEnabled) return;
+  
   // Check if already hidden
   if (videoElement.getAttribute('data-hidden-by-extension') === 'true') return;
   
@@ -243,19 +253,55 @@ function processVideoThumbnails() {
 
 // Check and skip current video if watched
 function checkAndSkipCurrentVideo() {
-  if (!settings.autoSkipEnabled) return;
+  if (!settings.autoSkipEnabled || !extensionEnabled) return;
   
   const currentUrl = window.location.href;
   const videoId = extractVideoId(currentUrl);
   
   if (videoId && watchedVideos.has(videoId)) {
-    // Find and click next button
-    const nextButton = document.querySelector('.ytp-next-button');
-    if (nextButton) {
-      const delay = settings.skipDelayEnabled ? settings.skipDelay * 1000 : 1000;
+    // Track skipped video
+    const videoTitle = document.querySelector('h1.ytd-video-primary-info-renderer')?.textContent || 'Unknown';
+    skippedVideos.push({
+      id: videoId,
+      title: videoTitle,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Keep only last 50 skipped videos
+    if (skippedVideos.length > 50) {
+      skippedVideos = skippedVideos.slice(-50);
+    }
+    
+    // Find the first unwatched video in recommendations
+    const recommendations = document.querySelectorAll('ytd-compact-video-renderer');
+    let nextVideoUrl = null;
+    
+    for (const rec of recommendations) {
+      const link = rec.querySelector('a#thumbnail');
+      if (link) {
+        const recVideoId = extractVideoId(link.href);
+        if (recVideoId && !watchedVideos.has(recVideoId)) {
+          nextVideoUrl = link.href;
+          break;
+        }
+      }
+    }
+    
+    // Navigate to next unwatched video or use default next
+    if (nextVideoUrl) {
+      const delay = settings.skipDelayEnabled ? settings.skipDelay * 1000 : 500;
       setTimeout(() => {
-        nextButton.click();
+        window.location.href = nextVideoUrl;
       }, delay);
+    } else {
+      // Fallback to next button if no unwatched video found
+      const nextButton = document.querySelector('.ytp-next-button');
+      if (nextButton) {
+        const delay = settings.skipDelayEnabled ? settings.skipDelay * 1000 : 500;
+        setTimeout(() => {
+          nextButton.click();
+        }, delay);
+      }
     }
   }
 }
@@ -322,6 +368,16 @@ async function init() {
 // Listen for messages from popup/options
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'updateSettings') {
+    // Only update threshold pending, don't apply yet
+    if (request.threshold !== undefined) {
+      pendingThreshold = request.threshold;
+    }
+  } else if (request.action === 'applySettings') {
+    // Apply pending threshold and reload settings
+    if (pendingThreshold !== null) {
+      settings.threshold = pendingThreshold;
+      pendingThreshold = null;
+    }
     loadSettings().then(() => {
       // Clear all processed flags to force re-processing
       document.querySelectorAll('[data-processed="true"]').forEach(el => {
@@ -338,19 +394,33 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       hiddenVideoCount = 0;
       updateBadge();
       // Re-process with new settings
+      if (extensionEnabled) {
+        processVideoThumbnails();
+      }
+    });
+  } else if (request.action === 'toggleExtension') {
+    extensionEnabled = request.enabled;
+    chrome.storage.sync.set({ extensionEnabled: extensionEnabled });
+    
+    if (!extensionEnabled) {
+      // Show all hidden videos
+      document.querySelectorAll('[data-hidden-by-extension="true"]').forEach(video => {
+        video.style.display = '';
+        video.style.opacity = '';
+        video.style.filter = '';
+        video.removeAttribute('data-hidden-by-extension');
+      });
+      hiddenVideoCount = 0;
+      updateBadge();
+    } else {
+      // Re-process videos
+      document.querySelectorAll('[data-processed="true"]').forEach(el => {
+        el.removeAttribute('data-processed');
+      });
       processVideoThumbnails();
-    });
-  } else if (request.action === 'showHiddenVideos') {
-    const hiddenVideos = document.querySelectorAll('[data-hidden-by-extension="true"]');
-    hiddenVideos.forEach(video => {
-      video.style.display = '';
-      video.style.opacity = '';
-      video.style.filter = '';
-      video.removeAttribute('data-hidden-by-extension');
-    });
-    // Reset hidden count
-    hiddenVideoCount = 0;
-    updateBadge();
+    }
+  } else if (request.action === 'getSkippedVideos') {
+    sendResponse({ skippedVideos: skippedVideos });
   }
 });
 

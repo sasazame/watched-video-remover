@@ -13,6 +13,47 @@
       margin-top: 0;
       color: #333;
       font-size: 18px;
+      text-align: center;
+    }
+    
+    .power-toggle {
+      display: flex;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    
+    .power-button {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      border: 3px solid #ccc;
+      background: #f0f0f0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+    
+    .power-button.active {
+      border-color: #ff0000;
+      background: #fff;
+    }
+    
+    .power-button:hover {
+      transform: scale(1.05);
+    }
+    
+    .power-icon {
+      width: 40px;
+      height: 40px;
+      fill: #666;
+      transition: fill 0.3s ease;
+    }
+    
+    .power-button.active .power-icon {
+      fill: #ff0000;
     }
     
     .setting-row {
@@ -93,34 +134,77 @@
       border-radius: 4px;
       font-size: 13px;
     }
+    
+    .skipped-section {
+      margin-top: 15px;
+      border-top: 1px solid #ddd;
+      padding-top: 15px;
+    }
+    
+    .skipped-list {
+      max-height: 150px;
+      overflow-y: auto;
+      font-size: 12px;
+      margin-top: 10px;
+    }
+    
+    .skipped-item {
+      padding: 5px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+    
+    .skipped-item:hover {
+      background-color: #f5f5f5;
+    }
+    
+    .disabled-content {
+      opacity: 0.5;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <h2>YouTube Watched Video Remover</h2>
   
-  <div class="setting-row">
-    <label for="threshold">Watched Threshold:</label>
-    <input type="range" id="threshold" min="1" max="100" value="90">
-    <div class="value-display" id="threshold-value">90%</div>
+  <div class="power-toggle">
+    <button id="power-button" class="power-button active">
+      <svg class="power-icon" viewBox="0 0 24 24">
+        <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/>
+      </svg>
+    </button>
   </div>
   
-  <div class="checkbox-row">
-    <input type="checkbox" id="auto-skip" checked>
-    <label for="auto-skip">Auto-skip watched videos</label>
-  </div>
-  
-  <div class="stats">
-    <strong>Statistics:</strong>
-    <div id="stats-content">
-      Watched videos: <span id="watched-count">0</span><br>
-      Hidden in this session: <span id="hidden-count">0</span>
+  <div id="main-content">
+    <div class="setting-row">
+      <label for="threshold">Watched Threshold:</label>
+      <input type="range" id="threshold" min="1" max="100" value="90">
+      <div class="value-display" id="threshold-value">90%</div>
+    </div>
+    
+    <div class="checkbox-row">
+      <input type="checkbox" id="auto-skip" checked>
+      <label for="auto-skip">Auto-skip watched videos</label>
+    </div>
+    
+    <div class="stats">
+      <strong>Statistics:</strong>
+      <div id="stats-content">
+        Watched videos: <span id="watched-count">0</span><br>
+        Hidden in this session: <span id="hidden-count">0</span>
+      </div>
+    </div>
+    
+    <button id="save-settings">Save Settings</button>
+    <button id="clear-data" class="secondary-button">Clear All Data</button>
+    <button id="open-options" class="secondary-button">Advanced Options</button>
+    
+    <div class="skipped-section">
+      <strong>Recently Skipped Videos:</strong>
+      <button id="refresh-skipped" class="secondary-button" style="float: right; padding: 4px 8px; font-size: 12px;">Refresh</button>
+      <div id="skipped-list" class="skipped-list"></div>
     </div>
   </div>
-  
-  <button id="save-settings">Save Settings & Reload</button>
-  <button id="show-hidden" class="secondary-button">Show Hidden Videos</button>
-  <button id="clear-data" class="secondary-button">Clear All Data</button>
-  <button id="open-options" class="secondary-button">Advanced Options</button>
   
   <div id="status" class="status"></div>
   
