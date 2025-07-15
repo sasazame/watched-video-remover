@@ -6,10 +6,7 @@ describe('YouTube Watched Video Remover', () => {
     // Reset settings to defaults
     settings = {
       threshold: 90,
-      autoSkipEnabled: true,
       hideMode: 'hide',
-      skipDelayEnabled: false,
-      skipDelay: 1,
       hideRegularVideos: true,
       hideShorts: true,
       hideLiveStreams: true,
@@ -22,20 +19,17 @@ describe('YouTube Watched Video Remover', () => {
     it('should load default settings', async () => {
       await loadSettings();
       expect(settings.threshold).to.equal(90);
-      expect(settings.autoSkipEnabled).to.equal(true);
       expect(settings.hideMode).to.equal('hide');
     });
     
     it('should load saved settings from storage', async () => {
       await chrome.storage.sync.set({
         threshold: 75,
-        autoSkipEnabled: false,
         hideMode: 'fade'
       });
       
       await loadSettings();
       expect(settings.threshold).to.equal(75);
-      expect(settings.autoSkipEnabled).to.equal(false);
       expect(settings.hideMode).to.equal('fade');
     });
     

@@ -1,17 +1,13 @@
 let watchedVideos = new Set();
 let pendingWatchedVideos = new Set(); // Buffer for batch saving
 let hiddenVideoCount = 0; // Track hidden videos in current session
-let skippedVideos = []; // Track skipped videos in current session
 let saveTimeout = null; // Timeout for batch saving
 const SAVE_DELAY = 5000; // Save every 5 seconds
 let extensionEnabled = true; // Master ON/OFF switch
 let pendingThreshold = null; // Pending threshold change
 let settings = {
   threshold: 90,
-  autoSkipEnabled: true,
   hideMode: 'hide',
-  skipDelayEnabled: false,
-  skipDelay: 1,
   hideRegularVideos: true,
   hideShorts: true,
   hideLiveStreams: true,
@@ -21,9 +17,9 @@ let settings = {
 // Load settings and watched videos
 async function loadSettings() {
   const result = await chrome.storage.sync.get([
-    'threshold', 'watchedVideos', 'autoSkipEnabled', 'hideMode',
-    'skipDelayEnabled', 'skipDelay', 'hideRegularVideos', 
-    'hideShorts', 'hideLiveStreams', 'maxStoredVideos', 'extensionEnabled'
+    'threshold', 'watchedVideos', 'hideMode',
+    'hideRegularVideos', 'hideShorts', 'hideLiveStreams', 
+    'maxStoredVideos', 'extensionEnabled'
   ]);
   
   // Update settings
@@ -180,24 +176,27 @@ function processVideoThumbnails() {
           }
         }
         
-        // Find parent video renderer - updated to include all possible containers
-        let videoRenderer = thumbnail.closest('ytd-rich-item-renderer, ytd-rich-grid-media, ytd-video-renderer, ytd-compact-video-renderer, ytd-grid-video-renderer');
+        // Find parent video renderer - prioritize the outermost container for grid layout
+        let videoRenderer = null;
         
-        // If not found, try alternative methods
+        // First, try to find the outermost container (ytd-rich-item-renderer) for home/trending pages
+        const richItemRenderer = thumbnail.closest('ytd-rich-item-renderer');
+        if (richItemRenderer) {
+          videoRenderer = richItemRenderer;
+        } else {
+          // For other page types, find the appropriate container
+          videoRenderer = thumbnail.closest('ytd-video-renderer, ytd-compact-video-renderer, ytd-grid-video-renderer, ytd-rich-grid-media');
+        }
+        
+        // If still not found, try alternative methods
         if (!videoRenderer) {
           // Try to find the dismissible container
           const dismissible = thumbnail.closest('[id="dismissible"]');
           if (dismissible) {
-            // Check if it's inside ytd-rich-grid-media
-            videoRenderer = dismissible.closest('ytd-rich-grid-media');
-            // If still not found, check for parent rich-item-renderer
-            if (!videoRenderer) {
-              videoRenderer = dismissible.parentElement?.closest('ytd-rich-item-renderer');
-            }
-            // As last resort, hide the dismissible itself if it's a video container
-            if (!videoRenderer && dismissible.querySelector('#details')) {
-              videoRenderer = dismissible;
-            }
+            // Check for parent containers
+            videoRenderer = dismissible.closest('ytd-rich-item-renderer') || 
+                          dismissible.closest('ytd-rich-grid-media') ||
+                          dismissible.closest('ytd-video-renderer');
           }
         }
         
@@ -255,60 +254,6 @@ function processVideoThumbnails() {
   }
 }
 
-// Check and skip current video if watched
-function checkAndSkipCurrentVideo() {
-  if (!settings.autoSkipEnabled || !extensionEnabled) return;
-  
-  const currentUrl = window.location.href;
-  const videoId = extractVideoId(currentUrl);
-  
-  if (videoId && watchedVideos.has(videoId)) {
-    // Track skipped video
-    const videoTitle = document.querySelector('h1.ytd-watch-metadata, h1.ytd-video-primary-info-renderer, .title.ytd-video-primary-info-renderer')?.textContent?.trim() || 'Unknown';
-    skippedVideos.push({
-      id: videoId,
-      title: videoTitle,
-      timestamp: new Date().toISOString()
-    });
-    
-    // Keep only last 50 skipped videos
-    if (skippedVideos.length > 50) {
-      skippedVideos = skippedVideos.slice(-50);
-    }
-    
-    // Find the first unwatched video in recommendations
-    const recommendations = document.querySelectorAll('ytd-compact-video-renderer');
-    let nextVideoUrl = null;
-    
-    for (const rec of recommendations) {
-      const link = rec.querySelector('a#thumbnail');
-      if (link) {
-        const recVideoId = extractVideoId(link.href);
-        if (recVideoId && !watchedVideos.has(recVideoId)) {
-          nextVideoUrl = link.href;
-          break;
-        }
-      }
-    }
-    
-    // Navigate to next unwatched video or use default next
-    if (nextVideoUrl) {
-      const delay = settings.skipDelayEnabled ? settings.skipDelay * 1000 : 500;
-      setTimeout(() => {
-        window.location.href = nextVideoUrl;
-      }, delay);
-    } else {
-      // Fallback to next button if no unwatched video found
-      const nextButton = document.querySelector('.ytp-next-button');
-      if (nextButton) {
-        const delay = settings.skipDelayEnabled ? settings.skipDelay * 1000 : 500;
-        setTimeout(() => {
-          nextButton.click();
-        }, delay);
-      }
-    }
-  }
-}
 
 // Check video player progress
 function checkVideoPlayerProgress() {
@@ -338,8 +283,9 @@ const urlObserver = new MutationObserver(() => {
   const url = location.href;
   if (url !== lastUrl) {
     lastUrl = url;
-    if (url.includes('/watch')) {
-      checkAndSkipCurrentVideo();
+    // Re-process videos on navigation
+    if (extensionEnabled) {
+      processVideoThumbnails();
     }
   }
 });
@@ -356,11 +302,8 @@ async function init() {
     processVideoThumbnails();
   }
   
-  // Check current video
+  // Monitor video progress on watch pages
   if (window.location.href.includes('/watch')) {
-    checkAndSkipCurrentVideo();
-    
-    // Monitor video progress
     setInterval(checkVideoPlayerProgress, 5000);
   }
   
@@ -458,9 +401,6 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
       processVideoThumbnails();
     }
-  } else if (request.action === 'getSkippedVideos') {
-    sendResponse({ skippedVideos: skippedVideos });
-    return true; // Important for async response
   }
 });
 

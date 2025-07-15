@@ -135,29 +135,6 @@
       font-size: 13px;
     }
     
-    .skipped-section {
-      margin-top: 15px;
-      border-top: 1px solid #ddd;
-      padding-top: 15px;
-    }
-    
-    .skipped-list {
-      max-height: 150px;
-      overflow-y: auto;
-      font-size: 12px;
-      margin-top: 10px;
-    }
-    
-    .skipped-item {
-      padding: 5px;
-      border-bottom: 1px solid #eee;
-      cursor: pointer;
-    }
-    
-    .skipped-item:hover {
-      background-color: #f5f5f5;
-    }
-    
     .disabled-content {
       opacity: 0.5;
       pointer-events: none;
@@ -182,11 +159,6 @@
       <div class="value-display" id="threshold-value">90%</div>
     </div>
     
-    <div class="checkbox-row">
-      <input type="checkbox" id="auto-skip" checked>
-      <label for="auto-skip">Auto-skip watched videos</label>
-    </div>
-    
     <div class="stats">
       <strong>Statistics:</strong>
       <div id="stats-content">
@@ -198,12 +170,6 @@
     <button id="save-settings">Save Settings</button>
     <button id="clear-data" class="secondary-button">Clear All Data</button>
     <button id="open-options" class="secondary-button">Advanced Options</button>
-    
-    <div class="skipped-section">
-      <strong>Recently Skipped Videos:</strong>
-      <button id="refresh-skipped" class="secondary-button" style="float: right; padding: 4px 8px; font-size: 12px;">Refresh</button>
-      <div id="skipped-list" class="skipped-list"></div>
-    </div>
   </div>
   
   <div id="status" class="status"></div>

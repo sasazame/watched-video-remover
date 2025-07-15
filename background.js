@@ -4,7 +4,6 @@ chrome.runtime.onInstalled.addListener((details) => {
     // Set default values
     chrome.storage.sync.set({
       threshold: 90,
-      autoSkipEnabled: true,
       watchedVideos: [],
       hideMode: 'hide', // 'hide' or 'fade'
       showStats: true,
@@ -47,7 +46,7 @@ setInterval(cleanupStorage, 24 * 60 * 60 * 1000);
 // Handle messages from content scripts
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'getSettings') {
-    chrome.storage.sync.get(['threshold', 'autoSkipEnabled', 'watchedVideos', 'hideMode'], (result) => {
+    chrome.storage.sync.get(['threshold', 'watchedVideos', 'hideMode'], (result) => {
       sendResponse(result);
     });
     return true; // Will respond asynchronously

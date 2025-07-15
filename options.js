@@ -3,9 +3,6 @@ const elements = {
   threshold: document.getElementById('threshold'),
   thresholdValue: document.getElementById('threshold-value'),
   hideMode: document.getElementById('hide-mode'),
-  autoSkipEnabled: document.getElementById('auto-skip-enabled'),
-  skipDelayEnabled: document.getElementById('skip-delay-enabled'),
-  skipDelay: document.getElementById('skip-delay'),
   hideRegularVideos: document.getElementById('hide-regular-videos'),
   hideShorts: document.getElementById('hide-shorts'),
   hideLiveStreams: document.getElementById('hide-live-streams'),
@@ -25,9 +22,6 @@ const elements = {
 const defaultSettings = {
   threshold: 90,
   hideMode: 'hide',
-  autoSkipEnabled: true,
-  skipDelayEnabled: false,
-  skipDelay: 1,
   hideRegularVideos: true,
   hideShorts: true,
   hideLiveStreams: true,
@@ -42,9 +36,6 @@ async function loadSettings() {
   elements.threshold.value = settings.threshold ?? defaultSettings.threshold;
   elements.thresholdValue.textContent = (settings.threshold ?? defaultSettings.threshold) + '%';
   elements.hideMode.value = settings.hideMode ?? defaultSettings.hideMode;
-  elements.autoSkipEnabled.checked = settings.autoSkipEnabled ?? defaultSettings.autoSkipEnabled;
-  elements.skipDelayEnabled.checked = settings.skipDelayEnabled ?? defaultSettings.skipDelayEnabled;
-  elements.skipDelay.value = settings.skipDelay ?? defaultSettings.skipDelay;
   elements.hideRegularVideos.checked = settings.hideRegularVideos ?? defaultSettings.hideRegularVideos;
   elements.hideShorts.checked = settings.hideShorts ?? defaultSettings.hideShorts;
   elements.hideLiveStreams.checked = settings.hideLiveStreams ?? defaultSettings.hideLiveStreams;
@@ -73,9 +64,6 @@ elements.saveButton.addEventListener('click', async () => {
   const settings = {
     threshold: parseInt(elements.threshold.value),
     hideMode: elements.hideMode.value,
-    autoSkipEnabled: elements.autoSkipEnabled.checked,
-    skipDelayEnabled: elements.skipDelayEnabled.checked,
-    skipDelay: parseInt(elements.skipDelay.value),
     hideRegularVideos: elements.hideRegularVideos.checked,
     hideShorts: elements.hideShorts.checked,
     hideLiveStreams: elements.hideLiveStreams.checked,
