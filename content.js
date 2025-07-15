@@ -139,10 +139,9 @@ function hideVideo(videoElement) {
   if (videoElement.getAttribute('data-hidden-by-extension') === 'true') return;
   
   if (settings.hideMode === 'hide') {
-    videoElement.style.display = 'none';
+    videoElement.classList.add('yt-watched-hidden');
   } else if (settings.hideMode === 'fade') {
-    videoElement.style.opacity = '0.5';
-    videoElement.style.filter = 'grayscale(0.5)';
+    videoElement.classList.add('yt-watched-faded');
   }
   videoElement.setAttribute('data-hidden-by-extension', 'true');
   
@@ -349,6 +348,9 @@ const urlObserver = new MutationObserver(() => {
 async function init() {
   await loadSettings();
   
+  // Inject CSS for hiding videos
+  injectStyles();
+  
   // Initial processing only if enabled
   if (extensionEnabled) {
     processVideoThumbnails();
@@ -374,6 +376,38 @@ async function init() {
   });
 }
 
+// Inject CSS styles
+function injectStyles() {
+  if (document.getElementById('yt-watched-remover-styles')) return;
+  
+  const style = document.createElement('style');
+  style.id = 'yt-watched-remover-styles';
+  style.textContent = `
+    /* Hide mode - completely remove from layout */
+    .yt-watched-hidden {
+      display: none !important;
+    }
+    
+    /* Fade mode */
+    .yt-watched-faded {
+      opacity: 0.5 !important;
+      filter: grayscale(0.5) !important;
+    }
+    
+    /* For grid items on home page - remove from grid flow */
+    ytd-rich-item-renderer.yt-watched-hidden {
+      display: none !important;
+    }
+    
+    /* Ensure grid reflows properly */
+    ytd-rich-grid-row:has(ytd-rich-item-renderer.yt-watched-hidden) {
+      display: flex !important;
+      flex-wrap: wrap !important;
+    }
+  `;
+  document.head.appendChild(style);
+}
+
 // Listen for messages from popup/options
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === 'updateSettings') {
@@ -394,9 +428,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
       // Show all hidden videos first
       document.querySelectorAll('[data-hidden-by-extension="true"]').forEach(video => {
-        video.style.display = '';
-        video.style.opacity = '';
-        video.style.filter = '';
+        video.classList.remove('yt-watched-hidden', 'yt-watched-faded');
         video.removeAttribute('data-hidden-by-extension');
       });
       // Reset hidden count
@@ -414,9 +446,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (!extensionEnabled) {
       // Show all hidden videos
       document.querySelectorAll('[data-hidden-by-extension="true"]').forEach(video => {
-        video.style.display = '';
-        video.style.opacity = '';
-        video.style.filter = '';
+        video.classList.remove('yt-watched-hidden', 'yt-watched-faded');
         video.removeAttribute('data-hidden-by-extension');
       });
       hiddenVideoCount = 0;
