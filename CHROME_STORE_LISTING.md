@@ -75,10 +75,10 @@ English
 
 ## Support Information
 - Support Email: [your-email@example.com]
-- Website: https://github.com/yourusername/youtube-watched-video-hider
+- Website: https://github.com/sasazame/youtube-watched-video-hider
 
 ## Privacy Policy Link
-https://github.com/yourusername/youtube-watched-video-hider/blob/main/PRIVACY.md
+https://github.com/sasazame/youtube-watched-video-hider/blob/main/PRIVACY.md
 
 ## Single Purpose Description
 This extension serves a single purpose: to hide watched videos from YouTube video lists based on user-configured watch percentage thresholds. It modifies the YouTube interface only to hide or fade out video elements that meet the watched criteria, without affecting playback, navigation, or any other YouTube functionality.

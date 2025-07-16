@@ -93,7 +93,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📮 Support
 
 If you encounter any issues or have suggestions:
-1. Check the [Issues](https://github.com/yourusername/youtube-watched-video-hider/issues) page
+1. Check the [Issues](https://github.com/sasazame/youtube-watched-video-hider/issues) page
 2. Create a new issue with detailed information
 3. Include your Chrome version and extension version
 

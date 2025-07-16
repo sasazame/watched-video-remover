@@ -79,7 +79,7 @@ If we update this privacy policy, we will:
 ## Open Source
 
 This extension is open source. You can review all code at:
-https://github.com/yourusername/youtube-watched-video-hider
+https://github.com/sasazame/youtube-watched-video-hider
 
 ## Contact
 
