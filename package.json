@@ -1,7 +1,7 @@
 {
-  "name": "youtube-watched-video-remover",
+  "name": "youtube-watched-video-hider",
   "version": "1.0.0",
-  "description": "Chrome extension to remove watched videos from YouTube",
+  "description": "Chrome extension to hide watched videos from YouTube lists",
   "scripts": {
     "test": "open test/test.html",
     "test:cli": "mocha test/test.js --require test/test-mocks.js"

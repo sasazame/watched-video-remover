@@ -1,8 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Watched Video Remover",
+  "name": "YouTube Watched Video Hider",
   "version": "1.0.0",
-  "description": "Remove watched videos from YouTube based on watch percentage threshold",
+  "description": "Hide watched videos from YouTube lists to focus on unwatched content. No auto-skip, just clean video lists.",
+  "author": "YouTube Watched Video Hider Contributors",
+  "homepage_url": "https://github.com/yourusername/youtube-watched-video-hider",
   "permissions": [
     "storage",
     "tabs"
