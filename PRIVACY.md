@@ -1,6 +1,6 @@
 # Privacy Policy for YouTube Watched Video Hider
 
-**Effective Date: January 2025**
+**Effective Date: July 2025**
 
 ## Overview
 
@@ -85,7 +85,7 @@ https://github.com/sasazame/youtube-watched-video-hider
 
 If you have any questions about this privacy policy, please:
 - Create an issue on our GitHub repository
-- Email: [your-email@example.com]
+- Email: [sasazame@zametech.com]
 
 ## Summary
 
