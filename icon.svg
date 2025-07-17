@@ -1,32 +1,35 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
   <!-- Background -->
-  <rect width="128" height="128" fill="#FF0000" rx="20"/>
+  <rect width="128" height="128" fill="#FFFFFF"/>
   
-  <!-- Video player container -->
-  <g transform="translate(14, 24)">
-    <!-- Video frame -->
-    <rect x="0" y="0" width="100" height="60" fill="#FFFFFF" rx="8"/>
+  <!-- YouTube-style play button with checkmark -->
+  <g transform="translate(10, 35)">
+    <!-- Red rounded rectangle background -->
+    <rect x="0" y="0" width="70" height="50" fill="#FF0000" rx="10"/>
     
-    <!-- Play button triangle -->
-    <path d="M 40 20 L 60 30 L 40 40 Z" fill="#FF0000"/>
-    
-    <!-- Progress bar background -->
-    <rect x="10" y="48" width="80" height="4" fill="#E0E0E0" rx="2"/>
-    
-    <!-- Progress bar filled (90% watched) -->
-    <rect x="10" y="48" width="72" height="4" fill="#FF0000" rx="2"/>
+    <!-- White checkmark -->
+    <path d="M 15 25 L 30 35 L 50 15" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="6" 
+          stroke-linecap="round" 
+          stroke-linejoin="round"/>
   </g>
   
-  <!-- Eye with slash (hidden) -->
-  <g transform="translate(64, 64)">
-    <!-- Eye outline -->
-    <path d="M -20 0 Q -10 -12, 0 -12 Q 10 -12, 20 0 Q 10 12, 0 12 Q -10 12, -20 0 Z" 
-          fill="none" stroke="#FFFFFF" stroke-width="4"/>
+  <!-- Trash can -->
+  <g transform="translate(85, 45)">
+    <!-- Trash can lid -->
+    <rect x="0" y="0" width="30" height="6" fill="#FF0000" rx="2"/>
+    <!-- Lid handle -->
+    <rect x="11" y="-4" width="8" height="4" fill="#FF0000" rx="2"/>
     
-    <!-- Eye pupil -->
-    <circle cx="0" cy="0" r="6" fill="#FFFFFF"/>
+    <!-- Trash can body -->
+    <path d="M 3 8 L 5 35 Q 5 38, 8 38 L 22 38 Q 25 38, 25 35 L 27 8 Z" 
+          fill="#FF0000"/>
     
-    <!-- Slash through eye -->
-    <line x1="-18" y1="-18" x2="18" y2="18" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+    <!-- Trash can lines -->
+    <line x1="10" y1="12" x2="10" y2="30" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+    <line x1="15" y1="12" x2="15" y2="30" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
+    <line x1="20" y1="12" x2="20" y2="30" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round"/>
   </g>
 </svg>
