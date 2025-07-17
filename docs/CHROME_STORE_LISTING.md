@@ -74,7 +74,7 @@ English
 - Marquee Promo Tile (1400x560): Feature highlights with privacy focus
 
 ## Support Information
-- Support Email: [your-email@example.com]
+- Support Email: [sasazame@zametech.com]
 - Website: https://github.com/sasazame/youtube-watched-video-hider
 
 ## Privacy Policy Link
