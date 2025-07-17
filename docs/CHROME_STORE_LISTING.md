@@ -7,7 +7,7 @@ Hide watched videos from YouTube lists to focus on unwatched content. Simple, pr
 
 **Focus on What You Haven't Watched Yet!**
 
-YouTube Watched Video Hider is a simple, privacy-focused extension that helps you discover new content by hiding videos you've already watched. Unlike other extensions, we focus on one thing only: cleaning up your video lists.
+Watched Video Remover is a simple, privacy-focused extension that helps you discover new content by hiding videos you've already watched. Unlike other extensions, we focus on one thing only: cleaning up your video lists.
 
 **What This Extension Does:**
 ✓ Hides watched videos from YouTube home, search, and recommendations
@@ -75,10 +75,10 @@ English
 
 ## Support Information
 - Support Email: [sasazame@zametech.com]
-- Website: https://github.com/sasazame/youtube-watched-video-hider
+- Website: https://github.com/sasazame/watched-video-remover
 
 ## Privacy Policy Link
-https://github.com/sasazame/youtube-watched-video-hider/blob/main/PRIVACY.md
+https://github.com/sasazame/watched-video-remover/blob/main/PRIVACY.md
 
 ## Single Purpose Description
 This extension serves a single purpose: to hide watched videos from YouTube video lists based on user-configured watch percentage thresholds. It modifies the YouTube interface only to hide or fade out video elements that meet the watched criteria, without affecting playback, navigation, or any other YouTube functionality.

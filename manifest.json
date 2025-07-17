@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Watched Video Hider",
+  "name": "Watched Video Remover",
   "version": "1.0.0",
   "description": "Hide watched videos from YouTube lists to focus on unwatched content. No auto-skip, just clean video lists.",
-  "author": "YouTube Watched Video Hider Contributors",
-  "homepage_url": "https://github.com/sasazame/youtube-watched-video-hider",
+  "author": "Watched Video Remover Contributors",
+  "homepage_url": "https://github.com/sasazame/watched-video-remover",
   "permissions": [
     "storage",
     "tabs"

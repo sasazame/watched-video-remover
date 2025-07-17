@@ -1,4 +1,4 @@
-# YouTube Watched Video Hider
+# Watched Video Remover
 
 A Chrome extension that automatically hides watched videos from YouTube lists, helping you focus on unwatched content.
 
@@ -93,7 +93,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📮 Support
 
 If you encounter any issues or have suggestions:
-1. Check the [Issues](https://github.com/sasazame/youtube-watched-video-hider/issues) page
+1. Check the [Issues](https://github.com/sasazame/watched-video-remover/issues) page
 2. Create a new issue with detailed information
 3. Include your Chrome version and extension version
 

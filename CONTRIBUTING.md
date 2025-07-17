@@ -1,6 +1,6 @@
-# Contributing to YouTube Watched Video Hider
+# Contributing to Watched Video Remover
 
-Thank you for your interest in contributing to YouTube Watched Video Hider! This document provides guidelines for contributing to the project.
+Thank you for your interest in contributing to Watched Video Remover! This document provides guidelines for contributing to the project.
 
 ## 🎯 Project Philosophy
 
@@ -15,7 +15,7 @@ If you're looking to add such features, this might not be the right project. We 
 ## 🚀 Getting Started
 
 1. Fork the repository
-2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/youtube-watched-video-hider.git`
+2. Clone your fork: `git clone https://github.com/YOUR-USERNAME/watched-video-remover.git`
 3. Create a new branch: `git checkout -b feature/your-feature-name`
 4. Make your changes
 5. Test thoroughly

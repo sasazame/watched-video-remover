@@ -1,10 +1,10 @@
-# Privacy Policy for YouTube Watched Video Hider
+# Privacy Policy for Watched Video Remover
 
 **Effective Date: July 2025**
 
 ## Overview
 
-YouTube Watched Video Hider is committed to protecting your privacy. This extension is designed with privacy as a core principle - we do not collect, store, or transmit any personal information.
+Watched Video Remover is committed to protecting your privacy. This extension is designed with privacy as a core principle - we do not collect, store, or transmit any personal information.
 
 ## Data Collection
 
@@ -79,7 +79,7 @@ If we update this privacy policy, we will:
 ## Open Source
 
 This extension is open source. You can review all code at:
-https://github.com/sasazame/youtube-watched-video-hider
+https://github.com/sasazame/watched-video-remover
 
 ## Contact
 
