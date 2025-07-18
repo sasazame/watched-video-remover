@@ -316,6 +316,11 @@ function injectStyles() {
       display: none !important;
     }
     
+    /* For subscription page - hide parent when child is hidden */
+    ytd-rich-item-renderer:has(yt-lockup-view-model.yt-watched-hidden) {
+      display: none !important;
+    }
+    
     /* Ensure grid reflows properly */
     ytd-rich-grid-row:has(ytd-rich-item-renderer.yt-watched-hidden) {
       display: flex !important;
@@ -343,6 +348,11 @@ function updateStyles() {
       
       /* For grid items on home page - remove from grid flow */
       ytd-rich-item-renderer.yt-watched-hidden {
+        display: none !important;
+      }
+      
+      /* For subscription page - hide parent when child is hidden */
+      ytd-rich-item-renderer:has(yt-lockup-view-model.yt-watched-hidden) {
         display: none !important;
       }
       
