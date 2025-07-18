@@ -65,7 +65,6 @@ async function batchSaveWatchedVideos() {
     const watchedArray = Array.from(watchedVideos);
     
     // Enforce max stored videos limit
-    const watchedArray = Array.from(watchedVideos);
     if (watchedArray.length > settings.maxStoredVideos) {
       // Remove oldest entries
       const toRemove = watchedArray.slice(0, watchedArray.length - settings.maxStoredVideos);
