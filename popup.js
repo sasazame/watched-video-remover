@@ -1,7 +1,6 @@
 // Get DOM elements
 const thresholdSlider = document.getElementById('threshold');
 const thresholdValue = document.getElementById('threshold-value');
-const saveButton = document.getElementById('save-settings');
 const clearDataButton = document.getElementById('clear-data');
 const openOptionsButton = document.getElementById('open-options');
 const statusDiv = document.getElementById('status');
@@ -75,31 +74,15 @@ powerButton.addEventListener('click', async () => {
   showStatus(extensionEnabled ? 'Extension enabled' : 'Extension disabled');
 });
 
-// Update threshold display
-thresholdSlider.addEventListener('input', (e) => {
-  thresholdValue.textContent = e.target.value + '%';
+// Update threshold display and save immediately
+thresholdSlider.addEventListener('input', async (e) => {
+  const threshold = parseInt(e.target.value);
+  thresholdValue.textContent = threshold + '%';
   
-  // Send pending threshold update to content script
-  const tabs = chrome.tabs.query({ active: true, currentWindow: true });
-  tabs.then(tabList => {
-    if (tabList[0]?.url?.includes('youtube.com')) {
-      chrome.tabs.sendMessage(tabList[0].id, { 
-        action: 'updateThreshold',
-        threshold: parseInt(e.target.value)
-      });
-    }
-  });
-});
-
-// Save settings
-saveButton.addEventListener('click', async () => {
-  const threshold = parseInt(thresholdSlider.value);
+  // Save threshold immediately
+  await chrome.storage.sync.set({ threshold: threshold });
   
-  await chrome.storage.sync.set({
-    threshold: threshold
-  });
-  
-  // Apply settings without reload
+  // Send update to all YouTube tabs
   const tabs = await chrome.tabs.query({ url: ['*://www.youtube.com/*', '*://youtube.com/*'] });
   tabs.forEach(tab => {
     chrome.tabs.sendMessage(tab.id, { 
@@ -111,9 +94,8 @@ saveButton.addEventListener('click', async () => {
       }
     });
   });
-  
-  showStatus('Settings applied!');
 });
+
 
 // Clear all data
 clearDataButton.addEventListener('click', async () => {
