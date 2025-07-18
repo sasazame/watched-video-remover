@@ -6,6 +6,7 @@ const elements = {
   fadeOpacityRow: document.getElementById('fade-opacity-row'),
   fadeOpacity: document.getElementById('fade-opacity'),
   fadeOpacityValue: document.getElementById('fade-opacity-value'),
+  showBadge: document.getElementById('show-badge'),
   saveButton: document.getElementById('save-options'),
   resetButton: document.getElementById('reset-options'),
   status: document.getElementById('status')
@@ -15,7 +16,8 @@ const elements = {
 const defaultSettings = {
   threshold: 90,
   hideMode: 'hide',
-  fadeOpacity: 50
+  fadeOpacity: 50,
+  showBadge: true
 };
 
 // Load settings
@@ -28,6 +30,7 @@ async function loadSettings() {
   elements.hideMode.value = settings.hideMode ?? defaultSettings.hideMode;
   elements.fadeOpacity.value = settings.fadeOpacity ?? defaultSettings.fadeOpacity;
   elements.fadeOpacityValue.textContent = (settings.fadeOpacity ?? defaultSettings.fadeOpacity) + '%';
+  elements.showBadge.checked = settings.showBadge ?? defaultSettings.showBadge;
   
   // Show/hide fade opacity based on hide mode
   updateFadeOpacityVisibility();
@@ -59,7 +62,8 @@ elements.saveButton.addEventListener('click', async () => {
   const settings = {
     threshold: parseInt(elements.threshold.value),
     hideMode: elements.hideMode.value,
-    fadeOpacity: parseInt(elements.fadeOpacity.value)
+    fadeOpacity: parseInt(elements.fadeOpacity.value),
+    showBadge: elements.showBadge.checked
   };
   
   await chrome.storage.sync.set(settings);

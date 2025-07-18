@@ -51,18 +51,24 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     });
     return true; // Will respond asynchronously
   } else if (request.action === 'updateBadge') {
-    // Update badge for the sender tab
-    if (sender.tab && sender.tab.id) {
-      const badgeText = request.count > 0 ? String(request.count) : '';
-      chrome.action.setBadgeText({
-        text: badgeText,
-        tabId: sender.tab.id
-      });
-      chrome.action.setBadgeBackgroundColor({
-        color: '#FF0000',
-        tabId: sender.tab.id
-      });
-    }
+    // Check if badge display is enabled
+    chrome.storage.sync.get(['showBadge'], (result) => {
+      const showBadge = result.showBadge !== false; // Default to true
+      
+      if (sender.tab && sender.tab.id) {
+        const badgeText = showBadge && request.count > 0 ? String(request.count) : '';
+        chrome.action.setBadgeText({
+          text: badgeText,
+          tabId: sender.tab.id
+        });
+        if (showBadge) {
+          chrome.action.setBadgeBackgroundColor({
+            color: '#FF0000',
+            tabId: sender.tab.id
+          });
+        }
+      }
+    });
   }
 });
 
