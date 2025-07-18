@@ -164,7 +164,7 @@
 </head>
 <body>
   <div class="container">
-    <h1>YouTube Watched Video Remover - Advanced Options</h1>
+    <h1>Watched Video Remover - Advanced Options</h1>
     
     <div class="section">
       <h2>Basic Settings</h2>
@@ -180,66 +180,25 @@
         <label for="hide-mode">Hide Mode</label>
         <select id="hide-mode">
           <option value="hide">Completely Hide</option>
-          <option value="fade">Fade Out (50% opacity)</option>
+          <option value="fade">Fade Out</option>
         </select>
         <div class="help-text">Choose how watched videos should be hidden</div>
       </div>
-    </div>
-    
-    <div class="section">
-      <h2>Content Types</h2>
       
-      <div class="checkbox-group">
-        <div class="checkbox-item">
-          <input type="checkbox" id="hide-regular-videos" checked>
-          <label for="hide-regular-videos">Hide regular videos</label>
-        </div>
-        
-        <div class="checkbox-item">
-          <input type="checkbox" id="hide-shorts" checked>
-          <label for="hide-shorts">Hide YouTube Shorts</label>
-        </div>
-        
-        <div class="checkbox-item">
-          <input type="checkbox" id="hide-live-streams" checked>
-          <label for="hide-live-streams">Hide live streams</label>
-        </div>
-      </div>
-    </div>
-    
-    <div class="section">
-      <h2>Data Management</h2>
-      
-      <div class="stats-section">
-        <h3>Statistics</h3>
-        <div class="stat-item">
-          <span>Total watched videos:</span>
-          <span id="watched-count">0</span>
-        </div>
-        <div class="stat-item">
-          <span>Storage used:</span>
-          <span id="storage-used">0 KB</span>
-        </div>
-      </div>
-      
-      <div class="form-row" style="margin-top: 20px;">
-        <label for="max-stored-videos">Maximum stored videos</label>
-        <input type="range" id="max-stored-videos" min="100" max="10000" step="100" value="5000">
-        <span class="range-value" id="max-videos-value">5000</span>
-        <div class="help-text">Older entries will be removed when limit is reached</div>
+      <div class="form-row" id="fade-opacity-row" style="display: none;">
+        <label for="fade-opacity">Fade Opacity</label>
+        <input type="range" id="fade-opacity" min="10" max="90" value="50">
+        <span class="range-value" id="fade-opacity-value">50%</span>
+        <div class="help-text">Opacity level for faded videos</div>
       </div>
     </div>
     
     <div class="button-group">
       <button id="save-options" class="primary-button">Save Options</button>
-      <button id="export-data" class="secondary-button">Export Data</button>
-      <button id="import-data" class="secondary-button">Import Data</button>
       <button id="reset-options" class="danger-button">Reset to Defaults</button>
     </div>
     
     <div id="status" class="status"></div>
-    
-    <input type="file" id="import-file" accept=".json" style="display: none;">
   </div>
   
   <script src="options.js"></script>

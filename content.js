@@ -8,17 +8,14 @@ let pendingThreshold = null; // Pending threshold change
 let settings = {
   threshold: 90,
   hideMode: 'hide',
-  hideRegularVideos: true,
-  hideShorts: true,
-  hideLiveStreams: true,
+  fadeOpacity: 50,
   maxStoredVideos: 5000
 };
 
 // Load settings and watched videos
 async function loadSettings() {
   const result = await chrome.storage.sync.get([
-    'threshold', 'watchedVideos', 'hideMode',
-    'hideRegularVideos', 'hideShorts', 'hideLiveStreams', 
+    'threshold', 'watchedVideos', 'hideMode', 'fadeOpacity',
     'maxStoredVideos', 'extensionEnabled'
   ]);
   
@@ -64,8 +61,8 @@ async function batchSaveWatchedVideos() {
   if (pendingWatchedVideos.size === 0) return;
   
   try {
-    // Merge pending videos with existing ones
-    pendingWatchedVideos.forEach(id => watchedVideos.add(id));
+    // Convert to array and add to existing watched videos
+    const watchedArray = Array.from(watchedVideos);
     
     // Enforce max stored videos limit
     const watchedArray = Array.from(watchedVideos);
@@ -121,7 +118,7 @@ function updateBadge() {
       count: hiddenVideoCount
     });
   } catch (error) {
-    // Ignore errors when extension context is invalidated
+    // Extension context might be invalidated
     console.warn('Failed to update badge:', error);
   }
 }
@@ -151,107 +148,91 @@ function processVideoThumbnails() {
   // Skip if extension is disabled
   if (!extensionEnabled) return;
   
-  // Regular videos with old structure
-  if (settings.hideRegularVideos) {
-    const thumbnails = document.querySelectorAll('ytd-thumbnail');
-    
-    thumbnails.forEach(thumbnail => {
-      // Skip only if already processed AND hidden
-      const alreadyHidden = thumbnail.closest('[data-hidden-by-extension="true"]');
-      if (thumbnail.getAttribute('data-processed') === 'true' && alreadyHidden) return;
-      thumbnail.setAttribute('data-processed', 'true');
-      
-      // Find progress bar
-      const progressBar = thumbnail.querySelector('#progress');
-      if (!progressBar) return;
-      
-      // Check if watched
-      if (isVideoWatched(progressBar)) {
-        // Find the video ID
-        const link = thumbnail.querySelector('a#thumbnail');
-        if (link) {
-          const videoId = extractVideoId(link.href);
-          if (videoId) {
-            queueWatchedVideo(videoId);
-          }
-        }
-        
-        // Find parent video renderer - prioritize the outermost container for grid layout
-        let videoRenderer = null;
-        
-        // First, try to find the outermost container (ytd-rich-item-renderer) for home/trending pages
-        const richItemRenderer = thumbnail.closest('ytd-rich-item-renderer');
-        if (richItemRenderer) {
-          videoRenderer = richItemRenderer;
-        } else {
-          // For other page types, find the appropriate container
-          videoRenderer = thumbnail.closest('ytd-video-renderer, ytd-compact-video-renderer, ytd-grid-video-renderer, ytd-rich-grid-media');
-        }
-        
-        // If still not found, try alternative methods
-        if (!videoRenderer) {
-          // Try to find the dismissible container
-          const dismissible = thumbnail.closest('[id="dismissible"]');
-          if (dismissible) {
-            // Check for parent containers
-            videoRenderer = dismissible.closest('ytd-rich-item-renderer') || 
-                          dismissible.closest('ytd-rich-grid-media') ||
-                          dismissible.closest('ytd-video-renderer');
-          }
-        }
-        
-        if (videoRenderer) {
-          // Check if it's a live stream
-          const isLive = videoRenderer.querySelector('ytd-badge-supported-renderer .badge-style-type-live-now, [aria-label*="LIVE"]');
-          if (isLive && !settings.hideLiveStreams) return;
-          
-          hideVideo(videoRenderer);
-        }
-      }
-    });
-    
-    // Process new YouTube structure (yt-lockup-view-model)
-    const lockups = document.querySelectorAll('yt-lockup-view-model');
-    
-    lockups.forEach(lockup => {
-      // Skip only if already processed AND hidden
-      if (lockup.getAttribute('data-processed') === 'true' && lockup.getAttribute('data-hidden-by-extension') === 'true') return;
-      lockup.setAttribute('data-processed', 'true');
-      
-      // Find progress bar in new structure
-      const progressBar = lockup.querySelector('.ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment');
-      if (!progressBar) return;
-      
-      // Check if watched
-      if (isVideoWatched(progressBar)) {
-        // Find the video ID
-        const link = lockup.querySelector('a[href*="/watch"]');
-        if (link) {
-          const videoId = extractVideoId(link.href);
-          if (videoId) {
-            queueWatchedVideo(videoId);
-          }
-        }
-        
-        // Hide the lockup element
-        hideVideo(lockup);
-      }
-    });
-  }
+  // Process all video thumbnails (regular videos, shorts, etc.)
+  const thumbnails = document.querySelectorAll('ytd-thumbnail');
   
-  // YouTube Shorts
-  if (settings.hideShorts) {
-    const shortsRenderers = document.querySelectorAll('ytd-reel-item-renderer');
-    shortsRenderers.forEach(renderer => {
-      if (renderer.getAttribute('data-processed') === 'true' && renderer.getAttribute('data-hidden-by-extension') === 'true') return;
-      renderer.setAttribute('data-processed', 'true');
-      
-      const progressBar = renderer.querySelector('#progress');
-      if (progressBar && isVideoWatched(progressBar)) {
-        hideVideo(renderer);
+  thumbnails.forEach(thumbnail => {
+    // Skip only if already processed AND hidden
+    const alreadyHidden = thumbnail.closest('[data-hidden-by-extension="true"]');
+    if (thumbnail.getAttribute('data-processed') === 'true' && alreadyHidden) return;
+    thumbnail.setAttribute('data-processed', 'true');
+    
+    // Find progress bar
+    const progressBar = thumbnail.querySelector('ytd-thumbnail-overlay-resume-playback-renderer #progress');
+    if (!progressBar) return;
+    
+    // Check if watched
+    if (isVideoWatched(progressBar)) {
+      // Find the video ID
+      const link = thumbnail.querySelector('a#thumbnail');
+      if (link) {
+        const videoId = extractVideoId(link.href);
+        if (videoId) {
+          queueWatchedVideo(videoId);
+        }
       }
-    });
-  }
+      
+      // Find parent video renderer - prioritize the outermost container for grid layout
+      let videoRenderer = null;
+      
+      // First, try to find the outermost container (ytd-rich-item-renderer) for home/trending pages
+      const richItemRenderer = thumbnail.closest('ytd-rich-item-renderer');
+      if (richItemRenderer) {
+        videoRenderer = richItemRenderer;
+      } else {
+        // For other page types, find the appropriate container
+        videoRenderer = thumbnail.closest('ytd-video-renderer, ytd-compact-video-renderer, ytd-grid-video-renderer, ytd-rich-grid-media');
+      }
+      
+      // If still not found, try alternative methods
+      if (!videoRenderer) {
+        // Try to find the dismissible container
+        const dismissible = thumbnail.closest('[id="dismissible"]');
+        if (dismissible) {
+          // Check for parent containers
+          videoRenderer = dismissible.closest('ytd-rich-item-renderer') || 
+                        dismissible.closest('ytd-rich-grid-media') ||
+                        dismissible.closest('ytd-video-renderer');
+        }
+      }
+      
+      if (videoRenderer) {
+        // Check if it's a live stream
+        const isLive = videoRenderer.querySelector('ytd-badge-supported-renderer .badge-style-type-live-now, [aria-label*="LIVE"]');
+        if (isLive) return; // Skip live streams
+        
+        hideVideo(videoRenderer);
+      }
+    }
+  });
+  
+  // Process new YouTube structure (yt-lockup-view-model)
+  const lockups = document.querySelectorAll('yt-lockup-view-model');
+  
+  lockups.forEach(lockup => {
+    // Skip only if already processed AND hidden
+    if (lockup.getAttribute('data-processed') === 'true' && lockup.getAttribute('data-hidden-by-extension') === 'true') return;
+    lockup.setAttribute('data-processed', 'true');
+    
+    // Find progress bar in new structure
+    const progressBar = lockup.querySelector('.ytThumbnailOverlayProgressBarHostWatchedProgressBarSegment');
+    if (!progressBar) return;
+    
+    // Check if watched
+    if (isVideoWatched(progressBar)) {
+      // Find the video ID
+      const link = lockup.querySelector('a[href*="/watch"]');
+      if (link) {
+        const videoId = extractVideoId(link.href);
+        if (videoId) {
+          queueWatchedVideo(videoId);
+        }
+      }
+      
+      // Hide the lockup element
+      hideVideo(lockup);
+    }
+  });
 }
 
 
@@ -270,23 +251,17 @@ function checkVideoPlayerProgress() {
   }
 }
 
-// Observer for dynamic content
-const observer = new MutationObserver((mutations) => {
-  if (extensionEnabled) {
-    processVideoThumbnails();
-  }
+// Observe DOM changes
+const observer = new MutationObserver(() => {
+  processVideoThumbnails();
 });
 
-// URL change observer
-let lastUrl = location.href;
+// Observe URL changes for single-page navigation
 const urlObserver = new MutationObserver(() => {
-  const url = location.href;
-  if (url !== lastUrl) {
-    lastUrl = url;
-    // Re-process videos on navigation
-    if (extensionEnabled) {
-      processVideoThumbnails();
-    }
+  const newUrl = window.location.href;
+  if (newUrl.includes('/watch')) {
+    // Clear interval if exists and restart
+    setInterval(checkVideoPlayerProgress, 5000);
   }
 });
 
@@ -331,9 +306,9 @@ function injectStyles() {
       display: none !important;
     }
     
-    /* Fade mode */
+    /* Fade mode - dynamic opacity */
     .yt-watched-faded {
-      opacity: 0.5 !important;
+      opacity: ${settings.fadeOpacity / 100} !important;
       filter: grayscale(0.5) !important;
     }
     
@@ -351,69 +326,122 @@ function injectStyles() {
   document.head.appendChild(style);
 }
 
+// Update styles when settings change
+function updateStyles() {
+  const style = document.getElementById('yt-watched-remover-styles');
+  if (style) {
+    style.textContent = `
+      /* Hide mode - completely remove from layout */
+      .yt-watched-hidden {
+        display: none !important;
+      }
+      
+      /* Fade mode - dynamic opacity */
+      .yt-watched-faded {
+        opacity: ${settings.fadeOpacity / 100} !important;
+        filter: grayscale(0.5) !important;
+      }
+      
+      /* For grid items on home page - remove from grid flow */
+      ytd-rich-item-renderer.yt-watched-hidden {
+        display: none !important;
+      }
+      
+      /* Ensure grid reflows properly */
+      ytd-rich-grid-row:has(ytd-rich-item-renderer.yt-watched-hidden) {
+        display: flex !important;
+        flex-wrap: wrap !important;
+      }
+    `;
+  }
+}
+
 // Listen for messages from popup/options
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  if (request.action === 'updateSettings') {
-    // Only update threshold pending, don't apply yet
-    if (request.threshold !== undefined) {
-      pendingThreshold = request.threshold;
+  if (request.action === 'settingsUpdated') {
+    // Update local settings
+    if (request.settings) {
+      Object.keys(request.settings).forEach(key => {
+        if (settings.hasOwnProperty(key)) {
+          settings[key] = request.settings[key];
+        }
+      });
+      // Update styles if fade opacity changed
+      updateStyles();
     }
-  } else if (request.action === 'applySettings') {
-    // Apply pending threshold and reload settings
+    
+    // Apply pending threshold if exists
     if (pendingThreshold !== null) {
       settings.threshold = pendingThreshold;
       pendingThreshold = null;
     }
-    loadSettings().then(() => {
-      // Clear all processed flags to force re-processing
-      document.querySelectorAll('[data-processed="true"]').forEach(el => {
-        el.removeAttribute('data-processed');
-      });
-      // Show all hidden videos first
-      document.querySelectorAll('[data-hidden-by-extension="true"]').forEach(video => {
-        video.classList.remove('yt-watched-hidden', 'yt-watched-faded');
-        video.removeAttribute('data-hidden-by-extension');
-      });
-      // Reset hidden count
-      hiddenVideoCount = 0;
-      updateBadge();
-      // Re-process with new settings
-      if (extensionEnabled) {
-        processVideoThumbnails();
-      }
+    
+    // Clear hidden videos and reprocess
+    document.querySelectorAll('[data-hidden-by-extension="true"]').forEach(element => {
+      element.classList.remove('yt-watched-hidden', 'yt-watched-faded');
+      element.removeAttribute('data-hidden-by-extension');
     });
+    hiddenVideoCount = 0;
+    updateBadge();
+    processVideoThumbnails();
   } else if (request.action === 'toggleExtension') {
     extensionEnabled = request.enabled;
-    chrome.storage.sync.set({ extensionEnabled: extensionEnabled });
     
-    if (!extensionEnabled) {
-      // Show all hidden videos
-      document.querySelectorAll('[data-hidden-by-extension="true"]').forEach(video => {
-        video.classList.remove('yt-watched-hidden', 'yt-watched-faded');
-        video.removeAttribute('data-hidden-by-extension');
+    if (extensionEnabled) {
+      // Re-enable: process videos
+      processVideoThumbnails();
+    } else {
+      // Disable: show all hidden videos
+      document.querySelectorAll('[data-hidden-by-extension="true"]').forEach(element => {
+        element.classList.remove('yt-watched-hidden', 'yt-watched-faded');
+        element.removeAttribute('data-hidden-by-extension');
       });
       hiddenVideoCount = 0;
       updateBadge();
-    } else {
-      // Re-process videos
-      document.querySelectorAll('[data-processed="true"]').forEach(el => {
-        el.removeAttribute('data-processed');
-      });
-      processVideoThumbnails();
     }
+  } else if (request.action === 'getHiddenCount') {
+    sendResponse({ count: hiddenVideoCount });
+  } else if (request.action === 'showHiddenVideos') {
+    // Temporarily show all hidden videos
+    document.querySelectorAll('[data-hidden-by-extension="true"]').forEach(element => {
+      element.classList.remove('yt-watched-hidden', 'yt-watched-faded');
+      element.removeAttribute('data-hidden-by-extension');
+    });
+    hiddenVideoCount = 0;
+    updateBadge();
+    
+    // Disable extension temporarily
+    extensionEnabled = false;
+  } else if (request.action === 'updateThreshold') {
+    // Store pending threshold
+    pendingThreshold = request.threshold;
   }
 });
 
-// Start when DOM is ready
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  init();
-}
+// Handle navigation within YouTube (single-page app)
+let lastUrl = location.href;
+new MutationObserver(() => {
+  const url = location.href;
+  if (url !== lastUrl) {
+    lastUrl = url;
+    // Clear hidden count when navigating
+    hiddenVideoCount = 0;
+    updateBadge();
+    
+    // Reprocess videos on new page
+    if (extensionEnabled) {
+      processVideoThumbnails();
+    }
+  }
+}).observe(document, { subtree: true, childList: true });
 
-// Save pending videos before page unload
-window.addEventListener('beforeunload', async () => {
+// Clean up on unload
+window.addEventListener('unload', async () => {
+  // Save any pending videos
   if (pendingWatchedVideos.size > 0) {
     await batchSaveWatchedVideos();
   }
 });
+
+// Start the extension
+init();
