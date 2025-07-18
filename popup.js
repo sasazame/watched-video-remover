@@ -84,7 +84,7 @@ thresholdSlider.addEventListener('input', (e) => {
   tabs.then(tabList => {
     if (tabList[0]?.url?.includes('youtube.com')) {
       chrome.tabs.sendMessage(tabList[0].id, { 
-        action: 'updateSettings',
+        action: 'updateThreshold',
         threshold: parseInt(e.target.value)
       });
     }
@@ -102,7 +102,10 @@ saveButton.addEventListener('click', async () => {
   // Apply settings without reload
   const tabs = await chrome.tabs.query({ url: ['*://www.youtube.com/*', '*://youtube.com/*'] });
   tabs.forEach(tab => {
-    chrome.tabs.sendMessage(tab.id, { action: 'applySettings' }, (response) => {
+    chrome.tabs.sendMessage(tab.id, { 
+      action: 'settingsUpdated',
+      settings: { threshold: threshold }
+    }, (response) => {
       if (chrome.runtime.lastError) {
         console.log('Tab communication error:', chrome.runtime.lastError);
       }
