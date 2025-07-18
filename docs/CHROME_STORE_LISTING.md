@@ -44,14 +44,24 @@ Watched Video Remover is a simple, privacy-focused extension that helps you disc
 4. Watched videos automatically disappear from lists
 5. Toggle ON/OFF anytime with one click
 
+**Works on all YouTube pages:**
+- Home page (Recommended videos)
+- Subscriptions page
+- Search results
+- Video watch page (Related videos)
+- Channel pages (Videos tab)
+- History page (⚠️ Use caution with low threshold values)
+
 **Features:**
 - Power button for quick enable/disable
 - Threshold slider (1-100%)
 - Hide or fade mode options
-- Separate controls for videos, Shorts, and live streams
 - Session statistics
 - Advanced options for power users
-- Data export/import
+- Badge toggle for hidden count display
+
+**Important Note:**
+This extension uses YouTube's built-in watch history to detect watched videos. Videos may not be hidden if you watched them while logged out, with history disabled, or on a different account.
 
 Simple. Focused. Private. Get back to discovering new content on YouTube!
 

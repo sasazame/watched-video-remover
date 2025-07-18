@@ -21,7 +21,24 @@ The extension simply hides videos you've already watched from various YouTube pa
 - **Visual Options**: Choose between completely hiding videos or fading them out
 - **ON/OFF Toggle**: Easily enable/disable the extension without removing it
 - **Session Statistics**: Track how many videos are hidden in the current session
-- **Data Management**: Export/import your settings and watched video data
+
+## 📍 Supported Pages
+
+The extension works on the following YouTube pages:
+- **Home page** (Recommended videos)
+- **Subscriptions page**
+- **Search results page**
+- **Video watch page** (Related videos in sidebar)
+- **Individual channel pages** (Videos tab)
+- **History page** ⚠️ (Warning: If threshold is set to a low value, most videos may be hidden)
+
+## ⚠️ Important Notice
+
+- **Video watch detection**: This extension uses YouTube's built-in watch history data to determine if a video has been watched. Therefore, videos you have actually watched may not be detected as "watched" if:
+  - You watched them while not logged in
+  - You watched them with history disabled
+  - YouTube's history data was cleared
+  - The video was watched on a different account
 
 ## 📦 Installation
 
