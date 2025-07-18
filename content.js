@@ -375,20 +375,37 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       pendingThreshold = null;
     }
     
-    // Clear hidden videos and reprocess
+    // Clear hidden videos and reprocess with a small delay to ensure stability
     document.querySelectorAll('[data-hidden-by-extension="true"]').forEach(element => {
       element.classList.remove('yt-watched-hidden', 'yt-watched-faded');
       element.removeAttribute('data-hidden-by-extension');
     });
+    
+    // Also clear the data-processed attribute to ensure reprocessing
+    document.querySelectorAll('[data-processed="true"]').forEach(element => {
+      element.removeAttribute('data-processed');
+    });
+    
     hiddenVideoCount = 0;
     updateBadge();
-    processVideoThumbnails();
+    
+    // Add a small delay before reprocessing to ensure DOM stability
+    setTimeout(() => {
+      processVideoThumbnails();
+    }, 100);
   } else if (request.action === 'toggleExtension') {
     extensionEnabled = request.enabled;
     
     if (extensionEnabled) {
-      // Re-enable: process videos
-      processVideoThumbnails();
+      // Re-enable: clear processed flags and process videos
+      document.querySelectorAll('[data-processed="true"]').forEach(element => {
+        element.removeAttribute('data-processed');
+      });
+      
+      // Process with a small delay
+      setTimeout(() => {
+        processVideoThumbnails();
+      }, 100);
     } else {
       // Disable: show all hidden videos
       document.querySelectorAll('[data-hidden-by-extension="true"]').forEach(element => {

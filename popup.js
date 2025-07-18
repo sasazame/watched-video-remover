@@ -74,12 +74,16 @@ powerButton.addEventListener('click', async () => {
   showStatus(extensionEnabled ? 'Extension enabled' : 'Extension disabled');
 });
 
-// Update threshold display and save immediately
-thresholdSlider.addEventListener('input', async (e) => {
+// Update threshold display in real-time
+thresholdSlider.addEventListener('input', (e) => {
+  thresholdValue.textContent = e.target.value + '%';
+});
+
+// Save and apply threshold when slider is released
+thresholdSlider.addEventListener('change', async (e) => {
   const threshold = parseInt(e.target.value);
-  thresholdValue.textContent = threshold + '%';
   
-  // Save threshold immediately
+  // Save threshold
   await chrome.storage.sync.set({ threshold: threshold });
   
   // Send update to all YouTube tabs
@@ -94,6 +98,9 @@ thresholdSlider.addEventListener('input', async (e) => {
       }
     });
   });
+  
+  // Show brief feedback
+  showStatus('Threshold updated');
 });
 
 
